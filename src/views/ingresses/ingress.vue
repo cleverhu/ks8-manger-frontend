@@ -28,28 +28,12 @@
           {{ scope.row.NameSpace }}
         </template>
       </el-table-column>
-      <el-table-column label="名字" width="150" align="center">
+      <el-table-column align="center" label="名字" width="120">
         <template slot-scope="scope">
-          <span>{{ scope.row.Name }}</span>
+          {{ scope.row.Name }}
         </template>
       </el-table-column>
-      <el-table-column label="状态" width="200" align="center">
-        <template slot-scope="scope">
-          <span v-html="getStatus(scope.row.IsComplete)"></span>
-          <span v-if="!scope.row.IsComplete" class="is-red">{{ scope.row.Message }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="镜像" width="250" align="center">
-        <template slot-scope="scope">
-          <p style="margin: 0px!important;">{{ scope.row.Images }}</p>
-          <p class="is-border" style="margin: 0px!important;">
-            <span>{{ scope.row.Replicas[0] }}</span>/
-            <span class="is-greed">{{ scope.row.Replicas[1] }}</span>/
-            <span class="is-red">{{ scope.row.Replicas[2] }}</span>
-          </p>
-        </template>
-      </el-table-column>
-      <el-table-column class-name="status-col" label="创建时间" width="170" align="center">
+      <el-table-column align="center" label="创建时间" width="200">
         <template slot-scope="scope">
           {{ scope.row.CreateTime }}
         </template>
@@ -59,7 +43,7 @@
 </template>
 
 <script>
-import {getDeploymentsList} from '@/api/deploypments'
+import {getIngressList} from "@/api/ingress";
 import {NewClient} from '@/utils/ws.js'
 import {getNSList} from "@/api/ns";
 
@@ -79,7 +63,7 @@ export default {
       list: null,
       listLoading: true,
       wsClient: null,
-      currentNS: 'all-namespaces',
+      currentNS: null,
       nsOptions: [{
         value: 'all-namespaces',
         label: 'all-namespaces'
@@ -94,7 +78,7 @@ export default {
     this.wsClient.onmessage = (e) => {
       if (e.data !== 'ping') {
         const object = JSON.parse(e.data)
-        if (object.type === 'Deployments') {
+        if (object.type === 'Ingress') {
           if (this.currentNS === 'all-namespaces' || this.currentNS === null) {
             this.currentNS = 'all-namespaces'
             this.fetchData(this.currentNS)
@@ -109,7 +93,7 @@ export default {
   methods: {
     fetchData(ns) {
       this.listLoading = true
-      getDeploymentsList(ns).then(response => {
+      getIngressList(ns).then(response => {
         this.list = response.data.data
         this.listLoading = false
       })
@@ -149,7 +133,7 @@ export default {
   color: red;
 }
 
-.is-greed {
+.is-green {
   color: green;
 }
 

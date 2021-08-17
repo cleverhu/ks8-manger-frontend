@@ -1,5 +1,5 @@
 const NewClient = function () {
-  var ws = new WebSocket("ws://localhost:8080/ws");
+  var ws = new WebSocket("ws://localhost:8080/v1/ws");
   ws.onopen = function () {
     console.log("open")
   }

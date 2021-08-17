@@ -65,49 +65,32 @@ export const constantRoutes = [
         name: 'deployments',
         component: () => import('@/views/workloads/deployment'),
         meta: {title: 'deployments列表', icon: 'table'}
-      },{
-        path: 'services',
-        name: 'services',
-        component: () => import('@/views/workloads/deployment'),
-        meta: {title: 'services列表', icon: 'table'}
+      }, {
+        path: 'pods',
+        name: 'pods',
+        component: () => import('@/views/workloads/pods'),
+        meta: {title: 'pods列表', icon: 'table'}
       },]
   },
-
   {
-    path: '/example',
+    path: '/ingresses',
     component: Layout,
-    redirect: '/example/table',
     name: 'Example',
-    meta: {title: '配置管理', icon: 'el-icon-s-help'},
+    meta: {title: 'ingress管理', icon: 'el-icon-s-help'},
     children: [
       {
-        path: 'cfgList',
-        name: 'cfgList',
-        component: () => import('@/views/cfg/list'),
-        meta: {title: '配置列表', icon: 'table'}
+        path: 'ingresslist',
+        name: 'ingresslist',
+        component: () => import('@/views/ingresses/ingress'),
+        meta: {title: 'ingress列表', icon: 'table'}
       },
       {
-        path: 'cfgNew',
-        name: 'cfgNew',
-        component: () => import('@/views/cfg/create'),
-        meta: {title: '新增配置', icon: 'table',}
-      },
-      {
-        path: 'cfgUpdate',
-        name: 'cfgUpdate',
-        component: () => import('@/views/cfg/update'),
-        hidden: true,
-        meta: {title: '修改配置', icon: 'table',}
-      },
-      {
-        path: 'table',
-        name: 'Table',
-        component: () => import('@/views/table/index'),
-        meta: {title: 'Table', icon: 'table'}
-      }
-    ]
+        path: 'createingress',
+        name: 'createingress',
+        component: () => import('@/views/ingresses/ingress-create'),
+        meta: {title: '创建ingress', icon: 'table'}
+      }]
   },
-
   {
     path: '/form',
     component: Layout,

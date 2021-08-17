@@ -35,18 +35,20 @@
       </el-table-column>
       <el-table-column label="状态" width="200" align="center">
         <template slot-scope="scope">
-          <span v-html="getStatus(scope.row.IsComplete)"></span>
-          <span v-if="!scope.row.IsComplete" class="is-red">{{ scope.row.Message }}</span>
+          <span v-html="getStatus(scope.row.IsReady)"></span>
+          <span v-if="!scope.row.IsReady" class="is-red">{{ scope.row.Message }}</span>
         </template>
       </el-table-column>
       <el-table-column label="镜像" width="250" align="center">
         <template slot-scope="scope">
           <p style="margin: 0px!important;">{{ scope.row.Images }}</p>
-          <p class="is-border" style="margin: 0px!important;">
-            <span>{{ scope.row.Replicas[0] }}</span>/
-            <span class="is-greed">{{ scope.row.Replicas[1] }}</span>/
-            <span class="is-red">{{ scope.row.Replicas[2] }}</span>
-          </p>
+          <p style="margin: 0px!important;">容器ip:{{ scope.row.IPs[0] }}</p>
+        </template>
+      </el-table-column>
+      <el-table-column label="主机" width="200" align="center">
+        <template slot-scope="scope">
+          <p style="margin: 0px!important;">{{ scope.row.NodeName }}</p>
+          <p style="margin: 0px!important;">主机ip:{{ scope.row.IPs[1] }}</p>
         </template>
       </el-table-column>
       <el-table-column class-name="status-col" label="创建时间" width="170" align="center">
@@ -59,7 +61,7 @@
 </template>
 
 <script>
-import {getDeploymentsList} from '@/api/deploypments'
+import {getPodsList} from "@/api/pods";
 import {NewClient} from '@/utils/ws.js'
 import {getNSList} from "@/api/ns";
 
@@ -79,7 +81,7 @@ export default {
       list: null,
       listLoading: true,
       wsClient: null,
-      currentNS: 'all-namespaces',
+      currentNS: null,
       nsOptions: [{
         value: 'all-namespaces',
         label: 'all-namespaces'
@@ -94,9 +96,9 @@ export default {
     this.wsClient.onmessage = (e) => {
       if (e.data !== 'ping') {
         const object = JSON.parse(e.data)
-        if (object.type === 'Deployments') {
+        if (object.type === 'Pods') {
           if (this.currentNS === 'all-namespaces' || this.currentNS === null) {
-            this.currentNS = 'all-namespaces'
+            this.currentNS ='all-namespaces'
             this.fetchData(this.currentNS)
           } else if (object.data.ns === this.currentNS) {
             this.list = object.data.data
@@ -109,7 +111,7 @@ export default {
   methods: {
     fetchData(ns) {
       this.listLoading = true
-      getDeploymentsList(ns).then(response => {
+      getPodsList(ns).then(response => {
         this.list = response.data.data
         this.listLoading = false
       })
@@ -149,7 +151,7 @@ export default {
   color: red;
 }
 
-.is-greed {
+.is-green {
   color: green;
 }
 

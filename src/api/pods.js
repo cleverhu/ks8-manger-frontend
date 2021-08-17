@@ -1,8 +1,8 @@
 import request from '@/utils/request'
 
-export function getDeploymentsList(ns) {
+export function getPodsList(ns) {
   return request({
-    url: '/deployments?namespace=' + ns,
+    url: '/pods?namespace=' + ns,
     method: 'get'
   })
 }
