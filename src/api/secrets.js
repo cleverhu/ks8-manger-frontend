@@ -10,7 +10,15 @@ export function getSecretsList(ns) {
 
 export function rmSecret(ns,name) {
   return request({
-    url: '/secrets?namespace'+ns +'&name='+name,
+    url: '/secrets?namespace='+ns +'&name='+name,
     method: 'delete',
+  })
+}
+
+export function createSecret(data) {
+  return request({
+    url: '/secrets',
+    method: 'post',
+    data
   })
 }
