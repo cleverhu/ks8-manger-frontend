@@ -28,31 +28,25 @@
           {{ scope.row.NameSpace }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="名字" width="120">
+      <el-table-column label="名字" width="150" align="center">
         <template slot-scope="scope">
-          {{ scope.row.Name }}
+          <span>{{ scope.row.Name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="配置" width="180">
+      <el-table-column label="类型" width="150" align="center">
         <template slot-scope="scope">
-          <p> <el-checkbox :disabled="true" v-model="scope.row.Options.IsCors">跨域</el-checkbox>   </p>
-          <p> <el-checkbox :disabled="true" v-model="scope.row.Options.IsRewrite">重写</el-checkbox>   </p>
-
+          <span>{{ scope.row.Type }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="域名" width="100">
-        <template slot-scope="scope">
-          <p><a target="_blank" :href="'http://'+scope.row.Host">{{ scope.row.Host }}</a></p>
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="创建时间" width="200">
+      <el-table-column class-name="status-col" label="创建时间" width="170" align="center">
         <template slot-scope="scope">
           {{ scope.row.CreateTime }}
         </template>
       </el-table-column>
+
       <el-table-column label="操作" width="100" align="center">
         <template slot-scope="scope">
-          <el-button type="danger" @click="()=>rmIngress(scope.row.NameSpace,scope.row.Name )" icon="el-icon-delete"
+          <el-button type="danger" @click="()=>rmSecret(scope.row.NameSpace,scope.row.Name )" icon="el-icon-delete"
                      circle></el-button>
         </template>
       </el-table-column>
@@ -61,9 +55,10 @@
 </template>
 
 <script>
-import {getIngressList, rmIngress} from "@/api/ingress";
+import {getSecretsList, rmSecret} from '@/api/secrets'
 import {NewClient} from '@/utils/ws.js'
 import {getNSList} from "@/api/ns";
+import {rmIngress} from "@/api/ingress";
 
 export default {
   filters: {
@@ -81,7 +76,7 @@ export default {
       list: null,
       listLoading: true,
       wsClient: null,
-      currentNS: null,
+      currentNS: 'all-namespaces',
       nsOptions: [{
         value: 'all-namespaces',
         label: 'all-namespaces'
@@ -96,7 +91,7 @@ export default {
     this.wsClient.onmessage = (e) => {
       if (e.data !== 'ping') {
         const object = JSON.parse(e.data)
-        if (object.type === 'Ingress') {
+        if (object.type === 'Secrets') {
           if (this.currentNS === 'all-namespaces' || this.currentNS === null) {
             this.currentNS = 'all-namespaces'
             this.fetchData(this.currentNS)
@@ -109,19 +104,19 @@ export default {
     }
   },
   methods: {
-    rmIngress(ns, name) {
+    rmSecret(ns, name) {
       this.$confirm('是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
         center: true
       }).then(() => {
-        rmIngress(ns, name)
+        rmSecret(ns, name)
       })
     },
     fetchData(ns) {
       this.listLoading = true
-      getIngressList(ns).then(response => {
+      getSecretsList(ns).then(response => {
         this.list = response.data.data
         this.listLoading = false
       })
@@ -152,7 +147,6 @@ export default {
     onSelectedDrug(val) {
       this.fetchData(val)
     },
-
   }
 }
 </script>
@@ -162,7 +156,7 @@ export default {
   color: red;
 }
 
-.is-green {
+.is-greed {
   color: green;
 }
 

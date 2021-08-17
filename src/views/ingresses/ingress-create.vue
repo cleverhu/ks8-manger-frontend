@@ -9,10 +9,29 @@
           <el-input v-model="name" placeholder="ingress名称"></el-input>
         </el-form-item>
         <el-form-item label="命名空间">
-          <el-input v-model="namespace" placeholder="如default"></el-input>
+          <!--<el-input v-model="namespace"  placeholder="如default"></el-input>-->
+          <el-select @change="changeNs" v-model="namespace">
+            <el-option v-for="ns in nslist"
+                       :label="ns"
+                       :value="ns"/>
+          </el-select>
         </el-form-item>
-
       </el-form>
+    </el-card>
+    <el-card class="box-card">
+      <div slot="header" class="clearfix">
+        <span>标签设置</span>
+      </div>
+      <div>
+        <el-input
+          type="textarea"
+          :rows="2"
+          placeholder="请输入内容"
+          v-model="annotations">
+        </el-input>
+      </div>
+      <Cors ref="corsConfig"></Cors>
+      <Rewrite ref="rewriteConfig"></Rewrite>
     </el-card>
     <el-card class="box-card">
       <div slot="header" class="clearfix">
@@ -31,7 +50,12 @@
               <el-input v-model="pathcfg.path" placeholder="Path"></el-input>
             </el-form-item>
             <el-form-item label="服务名">
-              <el-input v-model="pathcfg.svc_name" placeholder="填写Service Name"></el-input>
+              <!--<el-input v-model="pathcfg.svc_name"  placeholder="填写Service Name"></el-input>-->
+              <el-select v-model="pathcfg.svc_name">
+                <el-option v-for="svc in svclist"
+                           :label="svc.Name"
+                           :value="svc.Name"/>
+              </el-select>
             </el-form-item>
             <el-form-item label="端口">
               <el-input v-model="pathcfg.port" placeholder="填写服务端口"></el-input>
@@ -45,7 +69,9 @@
       </el-form>
 
     </el-card>
-
+    <div style="text-align: center;margin-top: 20px;color:red">
+      {{ errorMsg }}
+    </div>
     <div style="text-align: center;margin-top: 20px">
       <el-button type="primary" @click="postNew()">保存</el-button>
     </div>
@@ -54,6 +80,11 @@
 <script>
 import {createIngress} from '@/api/ingress'
 
+import {getNSList} from '@/api/ns'
+import {getList as getSvcList} from '@/api/svc'
+import Cors from './ingress-cors'
+import Rewrite from './ingress-rewrite'
+
 export default {
   data() {
     return {
@@ -61,10 +92,34 @@ export default {
       namespace: "",
       rules: [
         {host: "", paths: [{path: "", svc_name: "", port: "80"}]}
-      ]
+      ],
+      nslist: [], //ns列表
+      svclist: [], // service 列表
+      errorMsg: null,
+      annotations: "",
     }
   },
+  created() {
+    getNSList().then(rsp => {
+      console.log(rsp.data)
+      this.nslist = rsp.data
+    })
+  },
   methods: {
+    //清空选中的svc
+    clearSelectSvc() {
+      this.rules.forEach(rule => {
+        rule.paths.forEach(cfg => {
+          cfg.svc_name = ''
+        })
+      })
+    },
+    changeNs(ns) {
+      this.clearSelectSvc()
+      getSvcList(ns).then(rsp => {
+        this.svclist = rsp.data
+      })
+    },
     // 新增path 配置
     addPathCfg(index) {
       this.rules.forEach((rule, ruleindex) => {
@@ -85,13 +140,41 @@ export default {
         }
       })
     },
-    postNew() {
-      const data = {Name: this.name, Namespace: this.namespace, Rules: this.rules}
+    postNew() { //新增ingress
+      //let annotations = this.annotations + this.$refs.cros.output()
+      //let annotations = this.annotations + this.$refs.corsConfig.output()
+      let annotations = this.annotations
+      for (let ref in this.$refs) {
+        console.log(ref,)
+        let out = this.$refs[ref].output()
+        console.log(out, out === "null", out === null)
+        if (out !== null) {
+          annotations += out
+        }
+      }
+      const data = {
+        Name: this.name,
+        Namespace: this.namespace,
+        Rules: this.rules,
+        Annotations: annotations,
+      }
+
       createIngress(data)
         .then((rsp) => {
-          console.log(rsp.data)
-        })
+          this.errorMsg = ''
+          alert("成功")
+        }).catch((error) => {
+        if (error.response) {
+          this.errorMsg = JSON.stringify(error.response.data)
+        } else {
+          this.errorMsg = JSON.stringify(error.message)
+        }
+      })
     }
+  },
+  components: {
+    Cors,
+    Rewrite
   }
 
 }

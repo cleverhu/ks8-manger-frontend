@@ -15,3 +15,10 @@ export function createIngress(data) {
   })
 }
 
+export function rmIngress(ns,name) {
+  return request({
+    url: '/ingress?namespace'+ns +'&name='+name,
+    method: 'delete',
+  })
+}
+
